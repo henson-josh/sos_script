@@ -19,8 +19,7 @@ fi
 printf '%s\n'"Removing /var/log/tower/ files older than 5 days."'%s\n'
 find $tar_file/var/log/tower -mtime +5 -delete
 
-# printf "\x1b[31m\"this is in red\"\x1b[0m\n"
-
+# Variables
 hostname=$(cat $tar_file/hostname)
 ps=$(grep -c ansible $tar_file/ps)
 nginxErrorWarn=$(grep -c 'warn' ./sos*/var/log/nginx/error.log)
