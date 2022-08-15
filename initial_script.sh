@@ -89,15 +89,6 @@ done
 # Main program                                             #
 ############################################################
 
-if [ $Clean ]
-then
-  for file in "${tar_files[@]}"
-  do
-      sudo rm -rf $file
-  done
-  exit 0
-fi
-
 for file in "${tar_files[@]}"
 do 
   if [ ! -d $file ]
