@@ -1,25 +1,73 @@
 #!/bin/bash
+tar_file_array(){
+    if [ -e "*.tar.xz" ]
+    then
+	tar_files=($(/usr/bin/ls *.tar.xz | awk -F. '{print $1}'))
+    else
+	printf '%s\n\n'"No tar file(s) found in: $(pwd) "'%s\n\n'
+	exit 1
+    fi
+}
 
+untar_files(){
+    tar_file_array
+    for file in "${tar_files[@]}"
+    do 
+      if [ ! -d ${file} ]
+      then
+        if [ ${debug} ]
+        then
+          echo "all files ${tar_file[@]}"
+          echo "current file $file" 
+        fi
+        tar xf ${file}.tar.xz 
+      fi
+      run_commands $file
+    done
+}
 
-printf '%s\n'"Verifying SOS tarball is present in current directory."'%s\n'
-if [ ! -e *.tar.xz ]
+clean_directories(){
+  tar_file_array
+  for file in "${tar_files[@]}"
+  do 
+    if [ ${debug} ]
+    then
+        printf '%s\n'" Removing directory: $file"'%s\n' 
+    fi
+    sudo rm --interactive=once -rf ${file}
+  done
+  exit 0
+}
 
-   then 
-       printf '%s\n\n'"No .tar.xz file found!"'%s\n\n' 
-       exit 2
+run_commands(){
+  file=$1
+  cat ${file}/hostname
+  grep ansible ${file}/ps
+  grep ansible ${file}/installed-rpms
+
+}
+
+enable_debug(){
+    debug=true
+}
+
+if [ "${1}" != "" ]
+then
+    case $1 in
+	-c | Clean | clean)
+	    enable_debug
+	    clean_directories
+	    ;;
+	-d )
+	    enable_debug
+	    echo $debug
+	    ;;
+	*)
+	    echo -n "Unknown command: $1"
+	    printf '%s\n'" Unknown Command: "'%s\n'
+	    exit 2
+	    ;;
+    esac
 fi
 
-# this needs to be an array
-tar_file=$(ls *.tar.xz | awk -F. '{print $1}')
-if [ ! -d $tar_file ]
-   then
-   tar xf $tar_file.tar.xz
-fi
-cat $tar_file/hostname
-grep ansible $tar_file/ps
-grep ansible $tar_file/installed-rpms
-#time configurable var
-# time_range="+5"
-find $tar_file/var/log/tower -mtime +5 -delete
-grep ansible $
-grep -iR "WARN\|ERR\|FATAL" $tar_file/var/log/tower | awk -F'/' '{print $5, $NF}'
+untar_files
