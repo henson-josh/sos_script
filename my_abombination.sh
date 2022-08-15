@@ -1,5 +1,38 @@
 #!/bin/bash
 
+############################################################
+# Help                                                     #
+############################################################
+Help()
+{
+   # Display Help
+   echo
+   echo "Syntax: scriptTemplate [-a|h|v|V]"
+   echo "options:"
+   echo "a     Print all information."
+   echo "h     Print this Help."
+   echo "n     Print all nginx error.log warnings."
+   echo "t     Print all tower.log warnings."
+   echo "V     Print software version and exit."
+   echo
+}
+
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+while getopts ":h" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit;;
+   esac
+done
+
+############################################################
+# Main program                                             #
+############################################################
+
 # Verifying SOS Report tar file is present
 printf '%s\n'"Verifying SOS tarball is present in current directory."'%s\n'
 if [ ! -e *.tar.xz ]
