@@ -59,33 +59,6 @@ while [ -n "$1" ]; do # while loop starts
 
 done
 
-
-#while getopts ":h:n:t" option; do
-#   case $option in
-#      h) # display Help
-#         Help
-#         exit;;
-#      n) 
-#         for file in $tar_files
-#	 do 
-#             printf "\nHost ""\x1b[31m\'$(cat $file/hostname)'\\x1b[0m nginx error.log:\n"
-#             grep 'warn' $file/var/log/nginx/error.log
-#	 done
-#	 exit;;
-#      t) 
-#         for file in $tar_files
-#         do   
-#             printf "\nHost ""\x1b[31m\'$(cat $file/hostname)'\\x1b[0m tower.log warning messages:\n"
-#             grep -v 'pid' $file/var/log/tower/tower.log | grep 'WARN'
-#         done
-#         exit;; 
-#     \?) # Invalid option
-#         echo "Error: Invalid option"
-#	 Help
-#         exit;;
-#   esac
-#done
-
 ############################################################
 # Main program                                             #
 ############################################################
@@ -109,6 +82,7 @@ then
   done
   exit 0
 fi
+
 for file in "${tar_files[@]}"
 do 
   if [ ! -d $file ]
