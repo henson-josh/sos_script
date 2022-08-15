@@ -35,10 +35,10 @@ done
 
 # Verifying SOS Report tar file is present
 printf '%s\n'"Verifying SOS tarball is present in current directory."'%s\n'
-if [ ! -e *.tar.xz ]
+if  [ ! -e *.tar.xz ] 
    then
 	printf '%s\n'"\x1b[31mNo SOS Report found.\\x1b[0m"'%s\n'
-	exit 2
+        exit 2
 fi
 
 # Extracting all SOS tar files
