@@ -7,7 +7,7 @@ Help()
 {
    # Display Help
    echo
-   echo "Syntax: scriptTemplate [-a|h|v|V]"
+   echo "Syntax: whatever_the_final_name_will_be [-a|h|v|V]"
    echo "options:"
    echo "a     Print all information."
    echo "h     Print this Help."
