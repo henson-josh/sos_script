@@ -46,6 +46,7 @@ Help()
 {
    # Display Help
    echo
+   echo "Run command without any arguments initially to extract SOS Report(s)"
    echo "Syntax: whatever_the_final_name_will_be [-a|c|h|n|ps|V]"
    echo "options:"
    echo "c     Remove SOS report directories"
@@ -118,14 +119,13 @@ do
   if [ ! -d $file ]
   then
     tar xf $file.tar.xz
+    # Removing /var/log/tower/ files older than 5 days
+    find $file/var/log/tower -mtime +5 -delete
   fi
 done
 
 for file in "${tar_files[@]}"
     do
-
-# Removing /var/log/tower/ files older than 5 days
-find $file/var/log/tower -mtime +5 -delete
 
 # Variables for high level overview of the system
 hostname=$(cat $file/hostname)
