@@ -6,7 +6,8 @@
 
 tar_files=($(ls *.tar.xz | awk -F. '{print $1}'))
 
-tar_file_array(){
+tar_file_array()
+{
     if [ -e "*.tar.xz" ]
     then
         tar_files=($(/usr/bin/ls *.tar.xz | awk -F. '{print $1}'))
@@ -16,7 +17,8 @@ tar_file_array(){
     fi
 }
 
-enable_debug(){
+enable_debug()
+{
     debug=true
 }
 
