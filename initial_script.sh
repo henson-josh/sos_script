@@ -55,17 +55,18 @@ Help()
    # Display Help
    echo
    echo "Run command without any arguments initially to extract SOS Report(s)"
-   echo "Syntax: whatever_the_final_name_will_be [-c|d|h|n|ps|t|V]"
+   echo "Syntax: whatever_the_final_name_will_be [-c|d|h|n|ps|te|tw|V]"
    echo "options:"
    echo "c     Remove SOS report directories"
-   echo "d     Enable debug."
+   echo "d     Enable debug"
    echo "df    Print file system disk usage"
    echo "f     Print memory system free/used"
-   echo "h     Print this Help."
-   echo "n     Print all nginx error.log warnings."
-   echo "ps    Print all running ansible processes."
-   echo "t     Print all tower.log warnings."
-   echo "V     Print software version and exit."
+   echo "h     Print this Help"
+   echo "n     Print all nginx error.log warnings"
+   echo "ps    Print all running ansible processes"
+   echo "te    Print all tower.log errors"
+   echo "tw     Print all tower.log warnings"
+   echo "V     Print software version and exit"
    echo
 }
 
@@ -118,10 +119,18 @@ while [ -n "$1" ]; do # while loop starts
                 grep ansible $file/ps
             done
             exit;;
-        -t) # Display Warning messages from tower.log (filtered scaling up/down messages)
+        -te)
+	    # Display Error messages from tower.log (filtered scaling up/down messages)
             for file in "${tar_files[@]}"
             do
-                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} tower.log warning messages:\n"
+                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
+                grep -v 'pid' $file/var/log/tower/tower.log | grep 'WARN'
+            done
+            exit;;
+        -tw) # Display Warning messages from tower.log (filtered scaling up/down messages)
+            for file in "${tar_files[@]}"
+            do
+                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
                 grep -v 'pid' $file/var/log/tower/tower.log | grep 'WARN'
             done
             exit;;
