@@ -51,6 +51,8 @@ Help()
    echo "options:"
    echo "c     Remove SOS report directories"
    echo "d     Enable debug."
+   echo "df    Print file system disk usage"
+   echo "f     Print memory system free/used"
    echo "h     Print this Help."
    echo "n     Print all nginx error.log warnings."
    echo "ps    Print all running ansible processes."
@@ -84,6 +86,13 @@ while [ -n "$1" ]; do # while loop starts
                 cat $file/df
             done
     	    exit;;
+        -f)
+            for file in "${tar_files[@]}"
+            do
+                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
+                cat $file/free
+            done
+            exit;;	    
         -h) # Display help
             Help
             exit;;
@@ -139,6 +148,9 @@ hostname=$(cat $file/hostname)
 ps=$(grep -c ansible $file/ps)
 nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log)
 towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log | grep -c 'WARN')
+ansible=$(grep -i '^ansible' $file/installed-rpms | awk '{printf "   - "$1"\n"}')
+python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python | awk -F/ '{printf "   - "$4"\n"}')
+
 
 # Printing high level overview of the system
 #printf "\nOverview of host: ""\x1b[31m\'$hostname'\\x1b[0m has...\n"
@@ -147,8 +159,8 @@ printf "\nOverview of host:${LIGHT_CYAN} '$hostname'${NC}\n"
 printf " - ${LIGHT_BLUE}$ps${NC} ansible processes running
  - ${LIGHT_BLUE}$nginxErrorWarn${NC} warnings in the nginx error.log
  - ${LIGHT_BLUE}$towerlogWarn${NC} warnings in the current tower.log file (filtered scaling up/down warnings)
- - has ${LIGHT_GREEN}Ansible${NC} versions \n$(grep -i '^ansible' $file/installed-rpms | awk '{printf "   - "$1"\n"}')
- - has ${LIGHT_GREEN}Python${NC} versions \n$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python | awk -F/ '{printf "   - "$4"\n"}')
+ - has ${LIGHT_GREEN}Ansible${NC} versions \n$ansible
+ - has ${LIGHT_GREEN}Python${NC} versions \n$python
 "
 done 
 
