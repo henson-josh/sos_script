@@ -47,7 +47,7 @@ Help()
    # Display Help
    echo
    echo "Run command without any arguments initially to extract SOS Report(s)"
-   echo "Syntax: whatever_the_final_name_will_be [-a|c|h|n|ps|V]"
+   echo "Syntax: whatever_the_final_name_will_be [-c|d|h|n|ps|t|V]"
    echo "options:"
    echo "c     Remove SOS report directories"
    echo "d     Enable debug."
@@ -77,6 +77,13 @@ while [ -n "$1" ]; do # while loop starts
             enable_debug
             echo $debug
             exit;;
+        -df)
+            for file in "${tar_files[@]}"
+            do
+                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} file system disk usage:\n"
+                cat $file/df
+            done
+    	    exit;;
         -h) # Display help
             Help
             exit;;
@@ -102,7 +109,7 @@ while [ -n "$1" ]; do # while loop starts
             done
             exit;;
         -V) # Display Version
-            echo "SOS_Script 1.0.0"
+            echo "SOS_Script 1.1.0  |  16 Aug 2022"
             exit;;
         esac
 
