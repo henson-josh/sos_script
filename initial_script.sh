@@ -124,7 +124,7 @@ while [ -n "$1" ]; do # while loop starts
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
-                grep -v 'pid' $file/var/log/tower/tower.log | grep 'WARN'
+                grep -v 'pid' $file/var/log/tower/tower.log | grep 'ERROR'
             done
             exit;;
         -tw) # Display Warning messages from tower.log (filtered scaling up/down messages)
