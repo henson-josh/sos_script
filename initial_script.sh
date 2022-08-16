@@ -65,7 +65,7 @@ Help()
    echo "n     Print all nginx error.log warnings"
    echo "ps    Print all running ansible processes"
    echo "te    Print all tower.log errors"
-   echo "tw     Print all tower.log warnings"
+   echo "tw    Print all tower.log warnings"
    echo "V     Print software version and exit"
    echo
 }
