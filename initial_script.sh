@@ -13,16 +13,24 @@ BROWN_ORANGE='\033[0;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-LIGHT_GRAY='033[0;37m'
-DARK_GRAY='033[1;30m'
+LIGHT_GRAY='\033[0;37m'
+DARK_GRAY='\033[1;30m'
 LIGHT_RED='\e[1;31m'
 LIGHT_GREEN='\e[1;32m'
-YELLOW='033[1;33m'
+YELLOW='\033[1;33m'
 LIGHT_BLUE='\e[1;34m'
-LIGHT_PURPLE='033[1;35m'
+LIGHT_PURPLE='\033[1;35m'
 LIGHT_CYAN='\e[1;36m'
-WHITE='033[1;37m'
-NC='\033[0m' # No Color
+WHITE='\033[1;37m'
+NC='\033[0m' # No Color/Formatting
+BOLD='\033[1m'
+DIM='\033[2m'
+ITALIC='\033[3m'
+UL='\033[4m'
+BLINK='\033[5m'
+REV='\033[7m'
+INVIS='\033[8m'
+
 
 tar_files=($(ls *.tar.xz | awk -F. '{print $1}'))
 
@@ -32,7 +40,7 @@ tar_file_array()
     then
         tar_files=($(/usr/bin/ls *.tar.xz | awk -F. '{print $1}'))
     else
-        printf '%s\n\n'"${LIGHT_RED}[31mNo tar file(s) found in: $(pwd)${NC} "'%s\n\n'
+        printf '%s\n\n'"${BLINK}${LIGHT_RED}[31mNo tar file(s) found in: $(pwd)${NC} "'%s\n\n'
         exit 1
     fi
 }
@@ -71,7 +79,7 @@ while [ -n "$1" ]; do # while loop starts
         -c)
             for file in "${tar_files[@]}"
             do
-              printf '%s\n'" Removing directory: $file"'%s\n'
+              printf '%s\n'" ${BOLD}Removing directory: $file${NC}"'%s\n'
               sudo rm --interactive=once -rf ${file}
             done
             exit;;
@@ -144,21 +152,23 @@ for file in "${tar_files[@]}"
     do
 
 # Variables for high level overview of the system
-hostname=$(cat $file/hostname)
-ps=$(grep -c ansible $file/ps)
-nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log)
-towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log | grep -c 'WARN')
 ansible=$(grep -i '^ansible' $file/installed-rpms | awk '{printf "   - "$1"\n"}')
+hostname=$(cat $file/hostname)
+nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log)
+ps=$(grep -c ansible $file/ps)
 python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python | awk -F/ '{printf "   - "$4"\n"}')
+towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log | grep -c 'ERROR')
+towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log | grep -c 'WARN')
 
 
 # Printing high level overview of the system
 #printf "\nOverview of host: ""\x1b[31m\'$hostname'\\x1b[0m has...\n"
 
 printf "\nOverview of host:${LIGHT_CYAN} '$hostname'${NC}\n"
-printf " - ${LIGHT_BLUE}$ps${NC} ansible processes running
- - ${LIGHT_BLUE}$nginxErrorWarn${NC} warnings in the nginx error.log
- - ${LIGHT_BLUE}$towerlogWarn${NC} warnings in the current tower.log file (filtered scaling up/down warnings)
+printf " - ${LIGHT_BLUE}$ps${NC} ${BOLD}ansible${NC} processes running
+ - ${LIGHT_BLUE}$nginxErrorWarn${NC} warnings in the ${UL}nginx error.log${NC}
+ - ${LIGHT_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} file (filtered scaling up/down warnings)
+ - ${LIGHT_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} file
  - has ${LIGHT_GREEN}Ansible${NC} versions \n$ansible
  - has ${LIGHT_GREEN}Python${NC} versions \n$python
 "
