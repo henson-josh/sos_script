@@ -64,6 +64,7 @@ Help()
    echo "h     Print this Help"
    echo "n     Print all nginx error.log warnings"
    echo "ps    Print all running ansible processes"
+   echo "s     Print all denied messages from audit.log"
    echo "te    Print all tower.log errors"
    echo "tw    Print all tower.log warnings"
    echo "V     Print software version and exit"
@@ -119,6 +120,14 @@ while [ -n "$1" ]; do # while loop starts
                 grep ansible $file/ps
             done
             exit;;
+        -s)
+            # Display denied messages from audit.log
+            for file in "${tar_files[@]}"
+            do
+                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
+                grep 'denied' $file/var/log/audit/audit.log
+            done
+            exit;;	    
         -te)
 	    # Display Error messages from tower.log (filtered scaling up/down messages)
             for file in "${tar_files[@]}"
@@ -135,7 +144,7 @@ while [ -n "$1" ]; do # while loop starts
             done
             exit;;
         -V) # Display Version
-            echo "SOS_Script 1.1.0  |  16 Aug 2022"
+            echo "SOS_Script 1.1.1  |  17 Aug 2022"
             exit;;
         esac
 
@@ -157,27 +166,29 @@ do
   fi
 done
 
+printf "\n${LIGHT_GREEN}${BLINK}Use -h flag to see additional options.${NC}\n"
+
 for file in "${tar_files[@]}"
     do
 
 # Variables for high level overview of the system
 ansible=$(grep -i '^ansible' $file/installed-rpms | awk '{printf "   - "$1"\n"}')
+auditlogDenied=$(grep -c 'denied' $file/var/log/audit/audit.log)
 hostname=$(cat $file/hostname)
 nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log)
 ps=$(grep -c ansible $file/ps)
-python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python | awk -F/ '{printf "   - "$4"\n"}')
-towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log | grep -c 'ERROR')
-towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log | grep -c 'WARN')
+python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python | awk -F/ '{printf "   - "$4"\n"}' 2> /dev/null )
+towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -c 'ERROR')
+towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -c 'WARN')
 
 
 # Printing high level overview of the system
-#printf "\nOverview of host: ""\x1b[31m\'$hostname'\\x1b[0m has...\n"
-
 printf "\nOverview of host:${LIGHT_CYAN} '$hostname'${NC}\n"
-printf " - ${LIGHT_BLUE}$ps${NC} ${BOLD}ansible${NC} processes running
+printf " - ${LIGHT_BLUE}$ps${NC} ${UL}ansible${NC} processes running
  - ${LIGHT_BLUE}$nginxErrorWarn${NC} warnings in the ${UL}nginx error.log${NC}
- - ${LIGHT_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} file (filtered scaling up/down warnings)
- - ${LIGHT_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} file
+ - ${LIGHT_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} (filtered scaling up/down warnings)
+ - ${LIGHT_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} 
+ - ${LIGHT_BLUE}$auditlogDenied${NC} denials logged in ${UL}audit.log${NC}
  - has ${LIGHT_GREEN}Ansible${NC} versions \n$ansible
  - has ${LIGHT_GREEN}Python${NC} versions \n$python
 "
