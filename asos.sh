@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Ansible SOS Report Analyzer Script
+
 ############################################################
 # Arrays/Variables/Options                                 #
 ############################################################
@@ -55,13 +57,14 @@ Help()
    # Display Help
    echo
    echo "Run command without any arguments initially to extract SOS Report(s)"
-   echo "Syntax: whatever_the_final_name_will_be [-c|d|h|n|ps|te|tw|V]"
+   echo "Syntax: asos.sh [-c|d|h|n|ps|te|tw|V]"
    echo "options:"
    echo "c     Remove SOS report directories"
    echo "d     Enable debug"
    echo "df    Print file system disk usage"
-   echo "f     Print memory system free/used"
    echo "h     Print this Help"
+   echo "i     Print installed RPMs, will prompt user for input"
+   echo "m     Print memory system free/used"
    echo "n     Print all nginx error.log warnings"
    echo "ps    Print all running ansible processes"
    echo "s     Print all denied messages from audit.log"
@@ -96,15 +99,24 @@ while [ -n "$1" ]; do # while loop starts
                 cat $file/df
             done
     	    exit;;
-        -f)
+        -h) # Display help
+            Help
+            exit;;
+        -i) # Print Intalled RPMs, grep for variable
+            echo "Which packages are you looking for?  (i.e. ansible, python, etc)"
+            read rpmname
+            for file in "${tar_files[@]}"
+            do
+		printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
+                grep $rpmname $file/installed-rpms
+            done
+            exit;;		
+        -m) # Print current memory usage
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
                 cat $file/free
             done
-            exit;;	    
-        -h) # Display help
-            Help
             exit;;
         -n) # Display nginx error.log warning messages.
             for file in "${tar_files[@]}"
@@ -140,11 +152,11 @@ while [ -n "$1" ]; do # while loop starts
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
-                grep -v 'pid' $file/var/log/tower/tower.log | grep 'WARN'
+                grep -v 'pid' $file/var/log/tower/tower.log | grep -v 'periodic beat' | grep 'WARN'
             done
             exit;;
         -V) # Display Version
-            echo "SOS_Script 1.1.1  |  17 Aug 2022"
+            echo "SOS_Script 1.1.2  |  19 Aug 2022"
             exit;;
         esac
 
@@ -179,7 +191,7 @@ nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log)
 ps=$(grep -c ansible $file/ps)
 python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python | awk -F/ '{printf "   - "$4"\n"}' 2> /dev/null )
 towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -c 'ERROR')
-towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -c 'WARN')
+towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -v 'periodic beat' | grep -c 'WARN')
 
 
 # Printing high level overview of the system
@@ -189,8 +201,8 @@ printf " - ${LIGHT_BLUE}$ps${NC} ${UL}ansible${NC} processes running
  - ${LIGHT_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} (filtered scaling up/down warnings)
  - ${LIGHT_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} 
  - ${LIGHT_BLUE}$auditlogDenied${NC} denials logged in ${UL}audit.log${NC}
- - has ${LIGHT_GREEN}Ansible${NC} versions \n$ansible
- - has ${LIGHT_GREEN}Python${NC} versions \n$python
+ - has ${LIGHT_GREEN}Ansible${NC} versions: \n$ansible
+ - has ${LIGHT_GREEN}Python${NC} versions: \n$python
 "
 done 
 
