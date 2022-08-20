@@ -1,8 +1,9 @@
 #!/bin/bash
 tar_file_array(){
-    if [ -e "*.tar.xz" ]
+    if [ -n "$(ls $PWD/*.tar.xz)" ]
     then
-	tar_files=($(/usr/bin/ls *.tar.xz | awk -F. '{print $1}'))
+	sos_directories=($(echo $PWD*.tar.xz | awk -F. '{print $1}'))
+	tar_files=($(echo $PWD*.tar.xz ))
     else
 	printf '%s\n\n'"No tar file(s) found in: $(pwd) "'%s\n\n'
 	exit 1
@@ -13,61 +14,122 @@ untar_files(){
     tar_file_array
     for file in "${tar_files[@]}"
     do 
-      if [ ! -d ${file} ]
+      sos_directory=$(echo $file | awk -F. '{print $1}')
+      if [ ! -d ${sos_directory} ]
       then
         if [ ${debug} ]
         then
           echo "all files ${tar_file[@]}"
           echo "current file $file" 
         fi
-        tar xf ${file}.tar.xz 
+        echo tar xf ${file} --directory ${PWD}
       fi
-      run_commands $file
+      #run_commands $file
     done
 }
 
 clean_directories(){
   tar_file_array
-  for file in "${tar_files[@]}"
+  for file in "${sos_directories[@]}"
   do 
-    if [ ${debug} ]
+    if [ -d ${file} ]
     then
-        printf '%s\n'" Removing directory: $file"'%s\n' 
+	echo $file
+	if [ ${debug} ]
+	then
+	    printf '%s\n'" Removing directory: $file"'%s\n' 
+	fi
+	echo sudo rm --interactive=once -rf ${file}
     fi
-    sudo rm --interactive=once -rf ${file}
   done
   exit 0
 }
 
-run_commands(){
-  file=$1
-  cat ${file}/hostname
-  grep ansible ${file}/ps
-  grep ansible ${file}/installed-rpms
+hosts(){
+    cat ${file}/hostname
+}
 
+run_commands(){
+  for host in "${sos_directories}"
+  do
+    echo ${host}
+    file=${host}
+    cat ${file}/hostname
+    grep ansible ${file}/ps
+    grep ansible ${file}/installed-rpms
+  done
 }
 
 enable_debug(){
     debug=true
 }
+sosreport_location(){
+    PWD=$1
+}
 
-if [ "${1}" != "" ]
-then
-    case $1 in
-	-c | Clean | clean)
-	    enable_debug
-	    clean_directories
-	    ;;
-	-d )
-	    enable_debug
-	    echo $debug
-	    ;;
-	*)
-	    echo -n "Unknown command: $1"
-	    printf '%s\n'" Unknown Command: "'%s\n'
-	    exit 2
-	    ;;
-    esac
-fi
+dual_arguments(){
+        case $1 in
+          p )
+              sosreport_location $2
+              ;;
+          * )
+              echo "how did you get here"
+              echo " dual_argument error"
+              exit 3
+        esac
+}
+
+need_matching_argument=false
+for argument in "$@"
+do
+    if $need_matching_argument
+    then
+        need_matching_argument=false
+        dual_arguments "$flag_pair" "$argument"
+        continue
+    fi
+    if [[ ${argument} == "-"* ]]; then
+	flags="${argument:1}"
+	for char in ${flags}
+	do
+	    case ${char} in
+		c )
+		    enable_debug
+		    clean_directories
+		    ;;
+		d )
+		    enable_debug
+		    echo $debug
+		    ;;
+		p )
+		    flag_pair=${char}
+		    need_matching_argument=true
+		    break
+		    ;;
+		*)
+		    echo -n "Unknown command: $1"
+		    printf '%s\n'" Unknown Command: "'%s\n'
+		    exit 2
+		    ;;
+	    esac
+	done
+    else
+        case ${argument} in
+            clean )
+                clean_directories
+                ;;
+            hosts )
+                echo ${argument}
+                ;;
+            * )
+                echo argument error
+                echo -n "Unknown command: $1"
+                printf '%s\n'" Unknown Command: "'%s\n'
+                exit 2
+                ;;
+        esac
+    fi
+done
 
 untar_files
+#run_commands
