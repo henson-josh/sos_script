@@ -62,6 +62,7 @@ Help()
    echo "d     Enable debug"
    echo "df    Print file system disk usage"
    echo "h     Print this Help"
+   echo "hosts Print all hostnames from respective SOS Reports"
    echo "i     Print installed RPMs, will prompt user for input"
    echo "m     Print memory system free/used"
    echo "n     Print all nginx error.log warnings"
