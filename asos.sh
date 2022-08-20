@@ -7,7 +7,6 @@
 ############################################################
 
 # If color doesn't work replace 033 with \e
-# Only difference I see is LIGHT makes text bold.
 BLACK='\033[0;30m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -15,14 +14,14 @@ BROWN_ORANGE='\033[0;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-LIGHT_GRAY='\033[0;37m'
+BOLD_GRAY='\033[0;37m'
 DARK_GRAY='\033[1;30m'
-LIGHT_RED='\e[1;31m'
-LIGHT_GREEN='\e[1;32m'
+BOLD_RED='\e[1;31m'
+BOLD_GREEN='\e[1;32m'
 YELLOW='\033[1;33m'
-LIGHT_BLUE='\e[1;34m'
-LIGHT_PURPLE='\033[1;35m'
-LIGHT_CYAN='\e[1;36m'
+BOLD_BLUE='\e[1;34m'
+BOLD_PURPLE='\033[1;35m'
+BOLD_CYAN='\e[1;36m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color/Formatting
 BOLD='\033[1m'
@@ -42,7 +41,7 @@ tar_file_array()
     then
         tar_files=($(/usr/bin/ls *.tar.xz | awk -F. '{print $1}'))
     else
-        printf '%s\n\n'"${BLINK}${LIGHT_RED}[31mNo tar file(s) found in: $(pwd)${NC} "'%s\n\n'
+        printf '%s\n\n'"${BLINK}${BOLD_RED}[31mNo tar file(s) found in: $(pwd)${NC} "'%s\n\n'
         exit 1
     fi
 }
@@ -95,40 +94,47 @@ while [ -n "$1" ]; do # while loop starts
         -df)
             for file in "${tar_files[@]}"
             do
-                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} file system disk usage:\n"
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} file system disk usage:\n"
                 cat $file/df
             done
     	    exit;;
         -h) # Display help
             Help
             exit;;
+        -hosts) # Display all hostnames from SOS Reports
+            for file in "${tar_files[@]}"
+            do
+                printf "${BOLD_CYAN}'$(cat $file/hostname)'${NC}\n"
+            done
+            exit;;
+               
         -i) # Print Intalled RPMs, grep for variable
             echo "Which packages are you looking for?  (i.e. ansible, python, etc)"
             read rpmname
             for file in "${tar_files[@]}"
             do
-		printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
                 grep $rpmname $file/installed-rpms
             done
             exit;;		
         -m) # Print current memory usage
             for file in "${tar_files[@]}"
             do
-                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
                 cat $file/free
             done
             exit;;
         -n) # Display nginx error.log warning messages.
             for file in "${tar_files[@]}"
             do
-                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
                 grep 'warn' $file/var/log/nginx/error.log
             done
             exit;;
         -ps) # Display running ansible processes.
             for file in "${tar_files[@]}"
             do
-                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} ansible processes running:\n"
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} ansible processes running:\n"
                 grep ansible $file/ps
             done
             exit;;
@@ -136,7 +142,7 @@ while [ -n "$1" ]; do # while loop starts
             # Display denied messages from audit.log
             for file in "${tar_files[@]}"
             do
-                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
                 grep 'denied' $file/var/log/audit/audit.log
             done
             exit;;	    
@@ -144,14 +150,14 @@ while [ -n "$1" ]; do # while loop starts
 	    # Display Error messages from tower.log (filtered scaling up/down messages)
             for file in "${tar_files[@]}"
             do
-                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
                 grep -v 'pid' $file/var/log/tower/tower.log | grep 'ERROR'
             done
             exit;;
         -tw) # Display Warning messages from tower.log (filtered scaling up/down messages)
             for file in "${tar_files[@]}"
             do
-                printf "\nHost ${LIGHT_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
                 grep -v 'pid' $file/var/log/tower/tower.log | grep -v 'periodic beat' | grep 'WARN'
             done
             exit;;
@@ -178,7 +184,7 @@ do
   fi
 done
 
-printf "\n${LIGHT_GREEN}${BLINK}Use -h flag to see additional options.${NC}\n"
+printf "\n${BOLD_GREEN}${BLINK}Use -h flag to see additional options.${NC}\n"
 
 for file in "${tar_files[@]}"
     do
@@ -195,14 +201,14 @@ towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -v
 
 
 # Printing high level overview of the system
-printf "\nOverview of host:${LIGHT_CYAN} '$hostname'${NC}\n"
-printf " - ${LIGHT_BLUE}$ps${NC} ${UL}ansible${NC} processes running
- - ${LIGHT_BLUE}$nginxErrorWarn${NC} warnings in the ${UL}nginx error.log${NC}
- - ${LIGHT_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} (filtered scaling up/down warnings)
- - ${LIGHT_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} 
- - ${LIGHT_BLUE}$auditlogDenied${NC} denials logged in ${UL}audit.log${NC}
- - has ${LIGHT_GREEN}Ansible${NC} versions: \n$ansible
- - has ${LIGHT_GREEN}Python${NC} versions: \n$python
+printf "\nOverview of host:${BOLD_CYAN} '$hostname'${NC}\n"
+printf " - ${BOLD_BLUE}$ps${NC} ${UL}ansible${NC} processes running
+ - ${BOLD_BLUE}$nginxErrorWarn${NC} warnings in the ${UL}nginx error.log${NC}
+ - ${BOLD_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} (filtered scaling up/down warnings)
+ - ${BOLD_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} 
+ - ${BOLD_BLUE}$auditlogDenied${NC} denials logged in ${UL}audit.log${NC}
+ - has ${BOLD_GREEN}Ansible${NC} versions: \n$ansible
+ - has ${BOLD_GREEN}Python${NC} versions: \n$python
 "
 done 
 
