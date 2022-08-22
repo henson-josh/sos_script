@@ -129,7 +129,7 @@ while [ -n "$1" ]; do # while loop starts
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
-                grep 'warn' $file/var/log/nginx/error.log
+                grep 'warn' $file/var/log/nginx/error.log 2>/dev/null
             done
             exit;;
         -ps) # Display running ansible processes.
@@ -144,7 +144,7 @@ while [ -n "$1" ]; do # while loop starts
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
-                grep 'denied' $file/var/log/audit/audit.log
+                grep 'denied' $file/var/log/audit/audit.log 2>/dev/null
             done
             exit;;	    
         -te)
@@ -152,18 +152,18 @@ while [ -n "$1" ]; do # while loop starts
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
-                grep -v 'pid' $file/var/log/tower/tower.log | grep 'ERROR'
+                grep -v 'pid' $file/var/log/tower/tower.log | grep 'ERROR' 2>/dev/null
             done
             exit;;
         -tw) # Display Warning messages from tower.log (filtered scaling up/down messages)
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
-                grep -v 'pid' $file/var/log/tower/tower.log | grep -v 'periodic beat' | grep 'WARN'
+                grep -v 'pid' $file/var/log/tower/tower.log | grep -v 'periodic beat' | grep 'WARN' 2>/dev/null
             done
             exit;;
         -V) # Display Version
-            echo "SOS_Script 1.1.2  |  19 Aug 2022"
+            echo "SOS_Script 1.1.3  |  22 Aug 2022"
             exit;;
         esac
 
@@ -192,11 +192,11 @@ for file in "${tar_files[@]}"
 
 # Variables for high level overview of the system
 ansible=$(grep -i '^ansible' $file/installed-rpms | awk '{printf "   - "$1"\n"}')
-auditlogDenied=$(grep -c 'denied' $file/var/log/audit/audit.log)
+auditlogDenied=$(grep -c 'denied' $file/var/log/audit/audit.log 2>/dev/null)
 hostname=$(cat $file/hostname)
-nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log)
+nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log 2>/dev/null)
 ps=$(grep -c ansible $file/ps)
-python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python | awk -F/ '{printf "   - "$4"\n"}' 2> /dev/null )
+python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python 2>/dev/null | awk -F/ '{printf "   - "$4"\n"}')
 towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -c 'ERROR')
 towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -v 'periodic beat' | grep -c 'WARN')
 
