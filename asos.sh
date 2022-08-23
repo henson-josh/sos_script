@@ -144,7 +144,7 @@ while [ -n "$1" ]; do # while loop starts
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
-                grep 'denied' $file/var/log/audit/audit.log 2>/dev/null
+                grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep 'denied'
             done
             exit;;	    
         -te)
@@ -163,7 +163,7 @@ while [ -n "$1" ]; do # while loop starts
             done
             exit;;
         -V) # Display Version
-            echo "SOS_Script 1.1.3  |  22 Aug 2022"
+            echo "SOS_Script 1.1.4  |  23 Aug 2022"
             exit;;
         esac
 
@@ -192,7 +192,7 @@ for file in "${tar_files[@]}"
 
 # Variables for high level overview of the system
 ansible=$(grep -i '^ansible' $file/installed-rpms | awk '{printf "   - "$1"\n"}')
-auditlogDenied=$(grep -c 'denied' $file/var/log/audit/audit.log 2>/dev/null)
+auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
 hostname=$(cat $file/hostname)
 nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log 2>/dev/null)
 ps=$(grep -c ansible $file/ps)
@@ -207,7 +207,7 @@ printf " - ${BOLD_BLUE}$ps${NC} ${UL}ansible${NC} processes running
  - ${BOLD_BLUE}$nginxErrorWarn${NC} warnings in the ${UL}nginx error.log${NC}
  - ${BOLD_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} (filtered scaling up/down warnings)
  - ${BOLD_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} 
- - ${BOLD_BLUE}$auditlogDenied${NC} denials logged in ${UL}audit.log${NC}
+ - ${BOLD_BLUE}$auditlogDenied${NC} denials logged in ${UL}audit.log${NC} (permissive=1 excluded)
  - has ${BOLD_GREEN}Ansible${NC} versions: \n$ansible
  - has ${BOLD_GREEN}Python${NC} versions: \n$python
 "
