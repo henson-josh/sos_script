@@ -55,9 +55,10 @@ Help()
 {
    # Display Help
    echo
-   echo "Run command without any arguments initially to extract SOS Report(s)"
-   echo "[-c|d|df|h|hosts|i|m|n|ps|s|te|tw|V]"
+   printf '%s\n'"${BOLD}Run command without any arguments initially to extract SOS Report(s)${NC}\n"
+   echo "asos [-c|d|df|h|hosts|i|m|ne|nw|os|ps|s|te|tw|V]"
    echo "options:"
+   echo
    echo "c        Remove SOS report directories"
    echo "d        Enable debug"
    echo "df       Print file system disk usage"
@@ -65,12 +66,18 @@ Help()
    echo "hosts    Print all hostnames from respective SOS Reports"
    echo "i        Print installed RPMs, will prompt user for input"
    echo "m        Print memory system free/used"
-   echo "n        Print all nginx error.log warnings"
+   echo "os       Print /etc/os-release"
    echo "ps       Print all running ansible processes"
    echo "s        Print all denied messages from audit.log"
+   echo "V        Print software version"  
+   echo "----------"
+   echo "nginx logs:"
+   echo "ne       Print all nginx error.log errors"
+   echo "nw       Print all nginx error.log warnings"
+   echo "----------"
+   echo "tower logs:"   
    echo "te       Print all tower.log errors"
    echo "tw       Print all tower.log warnings"
-   echo "V        Print software version"
    echo
 }
 
@@ -166,14 +173,14 @@ while [ -n "$1" ]; do # while loop starts
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
-                grep -v 'pid' $file/var/log/tower/tower.log | grep 'ERROR' 2>/dev/null
+                grep -v 'pid' $file/var/log/tower/tower.log* | grep 'ERROR' 2>/dev/null
             done
             exit;;
         -tw) # Display Warning messages from tower.log (filtered scaling up/down messages)
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
-                grep -v 'pid' $file/var/log/tower/tower.log | grep -v 'periodic beat' | grep 'WARN' 2>/dev/null
+                grep -v 'pid' $file/var/log/tower/tower.log* | grep -v 'periodic beat' | grep 'WARN' 2>/dev/null
             done
             exit;;
         -V) # Display Version
@@ -205,15 +212,15 @@ for file in "${tar_files[@]}"
     do
 
 # Variables for high level overview of the system
-ansible=$(grep -i '^ansible' $file/installed-rpms | awk '{printf "   - "$1"\n"}')
+ansible=$(grep -i '^ansible' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
 auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
 hostname=$(cat $file/hostname)
 nginxErrorErr=$(grep -o 'error' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
 nginxErrorWarn=$(grep -o 'warn' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
-ps=$(grep -c ansible $file/ps)
+ps=$(grep -c ansible $file/ps 2>/dev/null)
 python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python 2>/dev/null | awk -F/ '{printf "   - "$4"\n"}')
-towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -c 'ERROR')
-towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -v 'periodic beat' | grep -c 'WARN')
+towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log* 2>/dev/null | grep -o 'ERROR' | wc -l)
+towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log* 2>/dev/null | grep -v 'periodic beat' | grep -o 'WARN' | wc -l)
 
 
 # Printing high level overview of the system
