@@ -1,4 +1,5 @@
 #!/bin/bash
+## this is a test
 tar_file_array(){
     if [ -n "$(ls $PWD/*.tar.xz)" ]
     then
