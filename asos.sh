@@ -125,13 +125,27 @@ while [ -n "$1" ]; do # while loop starts
                 cat $file/free
             done
             exit;;
-        -n) # Display nginx error.log warning messages.
+        -ne) # Display nginx error.log error messages.
             for file in "${tar_files[@]}"
             do
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
-                grep 'warn' $file/var/log/nginx/error.log 2>/dev/null
+                grep 'error' $file/var/log/nginx/error.log* 2>/dev/null
+            done
+            exit;;	    
+        -nw) # Display nginx error.log warning messages.
+            for file in "${tar_files[@]}"
+            do
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
+                grep 'warn' $file/var/log/nginx/error.log* 2>/dev/null
             done
             exit;;
+        -os) # Display Operating System.
+            for file in "${tar_files[@]}"
+            do
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} Operating System:\n"
+                cat $file/etc/os-release
+            done
+            exit;;	    
         -ps) # Display running ansible processes.
             for file in "${tar_files[@]}"
             do
@@ -163,7 +177,7 @@ while [ -n "$1" ]; do # while loop starts
             done
             exit;;
         -V) # Display Version
-            echo "SOS_Script 1.1.4  |  23 Aug 2022"
+            echo "SOS_Script 1.2.0  |  24 Aug 2022"
             exit;;
         esac
 
@@ -194,7 +208,8 @@ for file in "${tar_files[@]}"
 ansible=$(grep -i '^ansible' $file/installed-rpms | awk '{printf "   - "$1"\n"}')
 auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
 hostname=$(cat $file/hostname)
-nginxErrorWarn=$(grep -c 'warn' $file/var/log/nginx/error.log 2>/dev/null)
+nginxErrorErr=$(grep -o 'error' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
+nginxErrorWarn=$(grep -o 'warn' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
 ps=$(grep -c ansible $file/ps)
 python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python 2>/dev/null | awk -F/ '{printf "   - "$4"\n"}')
 towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -c 'ERROR')
@@ -204,6 +219,7 @@ towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log 2>/dev/null | grep -v
 # Printing high level overview of the system
 printf "\nOverview of host:${BOLD_CYAN} '$hostname'${NC}\n"
 printf " - ${BOLD_BLUE}$ps${NC} ${UL}ansible${NC} processes running
+ - ${BOLD_BLUE}$nginxErrorErr${NC} errors in the ${UL}nginx error.log${NC}
  - ${BOLD_BLUE}$nginxErrorWarn${NC} warnings in the ${UL}nginx error.log${NC}
  - ${BOLD_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} (filtered scaling up/down warnings)
  - ${BOLD_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} 
