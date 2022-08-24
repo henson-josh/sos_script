@@ -80,104 +80,104 @@ Help()
    echo "tw       Print all tower.log warnings"
    echo
 }
-
+untar_sos_files(){
+    for file in "${tar_files[@]}"
+    do 
+    if [ ! -d $file ]
+    then
+	tar xf $file.tar.xz
+	# Removing /var/log/tower/ files older than 5 days
+	find $file/var/log/tower -mtime +5 -delete
+    fi
+    done
+}
 ############################################################
 # Process the input options. Add options as needed.        #
 ############################################################
 # Get the options
-while [ -n "$1" ]; do # while loop starts
+while [ -n "$1" ]
+do 
+    for file in "${tar_files[@]}"
+    do
+	untar_sos_files
+	case "$1" in
+	    -c)
+		# need conditional if sos directory does not exists
+		printf '%s\n'" ${BOLD}Removing directory: $file${NC}"'%s\n'
+		sudo rm --interactive=once -rf ${file}
+		#done
+		exit;;
+	    -d)
+		enable_debug
+		echo $debug
+		exit;;
+	    -df)
+		#fails if sos directory does not exist
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} file system disk usage:\n"
+		cat $file/df
+		exit;;
+	    -h) # Display help
+		Help
+		exit;;
+	    -hosts) # Display all hostnames from SOS Reports
+		printf "${BOLD_CYAN}'$(cat $file/hostname)'${NC}\n"
+		exit;;
 
-	for file in "${tar_files[@]}"
-	do
-        case "$1" in
-        -c)
-	    # need conditional if sos directory does not exists
-              printf '%s\n'" ${BOLD}Removing directory: $file${NC}"'%s\n'
-              sudo rm --interactive=once -rf ${file}
-            #done
-            exit;;
-        -d)
-            enable_debug
-            echo $debug
-            exit;;
-        -df)
-	    #fails if sos directory does not exist
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} file system disk usage:\n"
-	    cat $file/df
-    	    exit;;
-        -h) # Display help
-            Help
-            exit;;
-        -hosts) # Display all hostnames from SOS Reports
-	    printf "${BOLD_CYAN}'$(cat $file/hostname)'${NC}\n"
-            exit;;
-               
-        -i) # Print Intalled RPMs, grep for variable
-            echo "Which packages are you looking for?  (i.e. ansible, python, etc)"
-            read rpmname
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
-	    grep $rpmname $file/installed-rpms
-            exit;;		
-        -m) # Print current memory usage
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
-	    cat $file/free
-            exit;;
-        -ne) # Display nginx error.log error messages.
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
-	    grep 'error' $file/var/log/nginx/error.log* 2>/dev/null
-            exit;;	    
-        -nw) # Display nginx error.log warning messages.
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
-	    grep 'warn' $file/var/log/nginx/error.log* 2>/dev/null
-            exit;;
-        -os) # Display Operating System.
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} Operating System:\n"
-	    cat $file/etc/os-release
-            exit;;	    
-        -ps) # Display running ansible processes.
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} ansible processes running:\n"
-	    grep ansible $file/ps
-            exit;;
-        -s)
-            # Display denied messages from audit.log
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
-	    grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep 'denied'
-            exit;;	    
-        -te)
-	    # Display Error messages from tower.log (filtered scaling up/down messages)
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
-	    grep -v 'pid' $file/var/log/tower/tower.log* | grep 'ERROR' 2>/dev/null
-            exit;;
-        -tw) # Display Warning messages from tower.log (filtered scaling up/down messages)
-	    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
-	    grep -v 'pid' $file/var/log/tower/tower.log* | grep -v 'periodic beat' | grep 'WARN' 2>/dev/null
-            exit;;
-        -V) # Display Version
-            echo "SOS_Script 1.2.0  |  24 Aug 2022"
-            exit;;
-	--test)
-	    # need to add simple test of args
-	    echo "sorry this is under construction"
-	    exit;;
-        esac
-
-        shift
+	    -i) # Print Intalled RPMs, grep for variable
+		echo "Which packages are you looking for?  (i.e. ansible, python, etc)"
+		read rpmname
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
+		grep $rpmname $file/installed-rpms
+		exit;;		
+	    -m) # Print current memory usage
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
+		cat $file/free
+		exit;;
+	    -ne) # Display nginx error.log error messages.
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
+		grep 'error' $file/var/log/nginx/error.log* 2>/dev/null
+		exit;;	    
+	    -nw) # Display nginx error.log warning messages.
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
+		grep 'warn' $file/var/log/nginx/error.log* 2>/dev/null
+		exit;;
+	    -os) # Display Operating System.
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} Operating System:\n"
+		cat $file/etc/os-release
+		exit;;	    
+	    -ps) # Display running ansible processes.
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} ansible processes running:\n"
+		grep ansible $file/ps
+		exit;;
+	    -s)
+		# Display denied messages from audit.log
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
+		grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep 'denied'
+		exit;;	    
+	    -te)
+		# Display Error messages from tower.log (filtered scaling up/down messages)
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
+		grep -v 'pid' $file/var/log/tower/tower.log* | grep 'ERROR' 2>/dev/null
+		exit;;
+	    -tw) # Display Warning messages from tower.log (filtered scaling up/down messages)
+		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
+		grep -v 'pid' $file/var/log/tower/tower.log* | grep -v 'periodic beat' | grep 'WARN' 2>/dev/null
+		exit;;
+	    -V) # Display Version
+		echo "SOS_Script 1.2.0  |  24 Aug 2022"
+		exit;;
+	    --test)
+		# need to add simple test of args
+		echo "sorry this is under construction"
+		exit;;
+	esac
+	shift
     done
 done
 
 ############################################################
 # System Overview                                          #
 ############################################################
-
-for file in "${tar_files[@]}"
-do 
-  if [ ! -d $file ]
-  then
-    tar xf $file.tar.xz
-    # Removing /var/log/tower/ files older than 5 days
-    find $file/var/log/tower -mtime +5 -delete
-  fi
-done
 
 printf "\n${BOLD_GREEN}${BLINK}Use -h flag to see additional options.${NC}\n"
 
