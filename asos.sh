@@ -55,7 +55,6 @@ Help()
 {
    # Display Help
    echo
-   printf '%s\n'"${BOLD}Run command without any arguments initially to extract SOS Report(s)${NC}\n"
    echo "asos [-c|d|df|h|hosts|i|m|ne|nw|os|ps|s|te|tw|V]"
    echo "options:"
    echo
