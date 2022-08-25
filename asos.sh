@@ -183,7 +183,8 @@ printf "\n${BOLD_GREEN}${BLINK}Use -h flag to see additional options.${NC}\n"
 
 for file in "${tar_files[@]}"
     do
-
+        untar_sos_files
+	
 # Variables for high level overview of the system
 ansible=$(grep -i '^ansible\|automation' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
 auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
