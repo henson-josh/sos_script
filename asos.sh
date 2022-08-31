@@ -72,7 +72,7 @@ Help()
    echo "----------"
    echo "awx-manage:"
    echo "li              Print awx-manage list_instances output"
-   echo "ch              Print awx-manage check_license output"
+   echo "cl              Print awx-manage check_license output"
    echo "----------"
    echo "nginx logs:"
    echo "ne              Print all nginx error.log errors"
@@ -110,6 +110,10 @@ do
 		sudo rm --interactive=once -rf ${file}
 		#done
 		exit;;
+            -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} license information:\n"
+                cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
+                exit;;		
 	    -d)
 		enable_debug
 		echo $debug
@@ -132,7 +136,11 @@ do
 		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
 		grep $rpmname $file/installed-rpms
 		exit;;		
-	    -m) # Print current memory usage
+            -li) # Display output from ./sos_commands/tower/awx-manage_list_instances
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} instances:\n"
+                cat $file/sos_commands/tower/awx-manage_list_instances 2>/dev/null
+                exit;;
+            -m ) # Print current memory usage
 		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
 		cat $file/free
 		exit;;
@@ -169,13 +177,9 @@ do
 	    -V) # Display Version
 		echo "SOS_Script 1.2.1  |  31 Aug 2022"
 		exit;;
-            --cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
+            -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
                 printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} license information:\n"
 		cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
-                exit;;
-            --li) # Display output from ./sos_commands/tower/awx-manage_list_instances
-                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} instances:\n"
-		cat $file/sos_commands/tower/awx-manage_list_instances 2>/dev/null
                 exit;;
 	    --test)
 		# need to add simple test of args
