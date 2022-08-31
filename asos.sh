@@ -58,25 +58,29 @@ Help()
    echo "asos [-c|d|df|h|hosts|i|m|ne|nw|os|ps|s|te|tw|V]"
    echo "options:"
    echo
-   echo "c        Remove SOS report directories"
-   echo "d        Enable debug"
-   echo "df       Print file system disk usage"
-   echo "h        Print this Help"
-   echo "hosts    Print all hostnames from respective SOS Reports"
-   echo "i        Print installed RPMs, will prompt user for input"
-   echo "m        Print memory system free/used"
-   echo "os       Print /etc/os-release"
-   echo "ps       Print all running ansible processes"
-   echo "s        Print all denied messages from audit.log"
-   echo "V        Print software version"  
+   echo "c               Remove SOS report directories"
+   echo "d               Enable debug"
+   echo "df              Print file system disk usage"
+   echo "h               Print this Help"
+   echo "hosts           Print all hostnames from respective SOS Reports"
+   echo "i               Print installed RPMs, will prompt user for input"
+   echo "m               Print memory system free/used"
+   echo "os              Print /etc/os-release"
+   echo "ps              Print all running ansible processes"
+   echo "s               Print all denied messages from audit.log"
+   echo "V               Print software version"  
+   echo "----------"
+   echo "awx-manage:"
+   echo "--li"           Print awx-manage list_instances output
+   echo "--ch"           Print awx-manage check_license output
    echo "----------"
    echo "nginx logs:"
-   echo "ne       Print all nginx error.log errors"
-   echo "nw       Print all nginx error.log warnings"
+   echo "ne              Print all nginx error.log errors"
+   echo "nw              Print all nginx error.log warnings"
    echo "----------"
    echo "tower logs:"   
-   echo "te       Print all tower.log errors"
-   echo "tw       Print all tower.log warnings"
+   echo "te              Print all tower.log errors"
+   echo "tw              Print all tower.log warnings"
    echo
 }
 untar_sos_files(){
@@ -163,8 +167,16 @@ do
 		grep -v 'pid' $file/var/log/tower/tower.log* | grep -v 'periodic beat' | grep 'WARN' 2>/dev/null
 		exit;;
 	    -V) # Display Version
-		echo "SOS_Script 1.2.0  |  24 Aug 2022"
+		echo "SOS_Script 1.2.1  |  31 Aug 2022"
 		exit;;
+            --cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} license information:\n"
+		cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
+                exit;;
+            --li) # Display output from ./sos_commands/tower/awx-manage_list_instances
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} instances:\n"
+		cat $file/sos_commands/tower/awx-manage_list_instances 2>/dev/null
+                exit;;
 	    --test)
 		# need to add simple test of args
 		echo "sorry this is under construction"
