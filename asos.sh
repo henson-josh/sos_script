@@ -71,8 +71,8 @@ Help()
    echo "V               Print software version"  
    echo "----------"
    echo "awx-manage:"
-   echo "--li"           Print awx-manage list_instances output
-   echo "--ch"           Print awx-manage check_license output
+   echo "li              Print awx-manage list_instances output"
+   echo "ch              Print awx-manage check_license output"
    echo "----------"
    echo "nginx logs:"
    echo "ne              Print all nginx error.log errors"
