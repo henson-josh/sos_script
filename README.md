@@ -20,7 +20,7 @@ V               Print software version
 ----------
 awx-manage:
 li              Print awx-manage list_instances output
-ch              Print awx-manage check_license output
+cl              Print awx-manage check_license output
 ----------
 nginx logs:
 ne              Print all nginx error.log errors
