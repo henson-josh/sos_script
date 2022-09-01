@@ -13,6 +13,7 @@ h               Print this Help
 hosts           Print all hostnames from respective SOS Reports
 i               Print installed RPMs, will prompt user for input
 m               Print memory system free/used
+mnt             Print findmnt output
 os              Print /etc/os-release
 ps              Print all running ansible processes
 s               Print all denied messages from audit.log

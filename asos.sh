@@ -65,6 +65,7 @@ Help()
    echo "hosts           Print all hostnames from respective SOS Reports"
    echo "i               Print installed RPMs, will prompt user for input"
    echo "m               Print memory system free/used"
+   echo "mnt             Print findmnt output"
    echo "os              Print /etc/os-release"
    echo "ps              Print all running ansible processes"
    echo "s               Print all denied messages from audit.log"
@@ -103,6 +104,10 @@ do
     for file in "${tar_files[@]}"
     do
 	untar_sos_files
+    done
+
+    for file in "${tar_files[@]}"
+    do    
 	case "$1" in
 	    -c)
 		# need conditional if sos directory does not exists
@@ -129,7 +134,6 @@ do
 	    -hosts) # Display all hostnames from SOS Reports
 		printf "${BOLD_CYAN}'$(cat $file/hostname)'${NC}\n"
 		exit;;
-
 	    -i) # Print Intalled RPMs, grep for variable
 		echo "Which packages are you looking for?  (i.e. ansible, python, etc)"
 		read rpmname
@@ -144,6 +148,14 @@ do
 		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
 		cat $file/free
 		exit;;
+            -mnt ) # Print findmnt output
+for file in "${tar_files[@]}"
+do
+                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} findmnt:\n"
+                cat $file/sos_commands/filesys/findmnt
+done		
+                exit;;		
+  
 	    -ne) # Display nginx error.log error messages.
 		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
 		grep 'error' $file/var/log/nginx/error.log* 2>/dev/null
@@ -199,7 +211,10 @@ printf "\n${BOLD_GREEN}${BLINK}Use -h flag to see additional options.${NC}\n"
 for file in "${tar_files[@]}"
     do
         untar_sos_files
-	
+done
+
+for file in "${tar_files[@]}"
+    do
 # Variables for high level overview of the system
 ansible=$(grep -i '^ansible\|automation' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
 auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
