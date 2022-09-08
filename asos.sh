@@ -91,7 +91,7 @@ untar_sos_files(){
     then
 	tar xf $file.tar.xz
 	# Removing /var/log/tower/ files older than 5 days
-	find $file/var/log/tower -mtime +5 -delete
+	find $file/var/log/tower -mtime +5 -delete 2>/dev/null
     fi
     done
 }
