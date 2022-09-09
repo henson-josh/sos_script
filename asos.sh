@@ -109,89 +109,131 @@ do
     for file in "${tar_files[@]}"
     do    
 	case "$1" in
-	    -c)
+	    -c) # Remove SOS Report directories
 		# need conditional if sos directory does not exists
-		printf '%s\n'" ${BOLD}Removing directory: $file${NC}"'%s\n'
-		sudo rm --interactive=once -rf ${file}
-		#done
+                for file in "${tar_files[@]}"
+                do
+		    printf '%s\n'" ${BOLD}Removing directory: $file${NC}"'%s\n'
+		    sudo rm --interactive=once -rf ${file}
+		done
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
-                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} license information:\n"
-                cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
+                for file in "${tar_files[@]}"
+                do
+    		    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} license information:\n"
+                    cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
+		done
                 exit;;		
-	    -d)
+	    -d) # Enable debugging
 		enable_debug
 		echo $debug
 		exit;;
 	    -df)
 		#fails if sos directory does not exist
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} file system disk usage:\n"
-		cat $file/df
+                for file in "${tar_files[@]}"
+                do
+		    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} file system disk usage:\n"
+		    cat $file/df
+	        done
 		exit;;
 	    -h) # Display help
 		Help
 		exit;;
 	    -hosts) # Display all hostnames from SOS Reports
-		printf "${BOLD_CYAN}'$(cat $file/hostname)'${NC}\n"
+                for file in "${tar_files[@]}"
+                do
+		    printf "${BOLD_CYAN}'$(cat $file/hostname)'${NC}\n"
+                done
 		exit;;
 	    -i) # Print Intalled RPMs, grep for variable
-		echo "Which packages are you looking for?  (i.e. ansible, python, etc)"
-		read rpmname
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
-		grep $rpmname $file/installed-rpms
+                for file in "${tar_files[@]}"
+                do
+		    echo "Which packages are you looking for?  (i.e. ansible, python, etc)"
+		    read rpmname
+		    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
+		    grep $rpmname $file/installed-rpms
+	        done
 		exit;;		
             -li) # Display output from ./sos_commands/tower/awx-manage_list_instances
-                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} instances:\n"
-                cat $file/sos_commands/tower/awx-manage_list_instances 2>/dev/null
+                for file in "${tar_files[@]}"
+                do
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} instances:\n"
+                    cat $file/sos_commands/tower/awx-manage_list_instances 2>/dev/null
+	        done
                 exit;;
-            -m ) # Print current memory usage
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
-		cat $file/free
+            -m) # Print current memory usage
+                for file in "${tar_files[@]}"
+                do
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
+		    cat $file/free
+	        done
 		exit;;
-            -mnt ) # Print findmnt output
-for file in "${tar_files[@]}"
-do
-                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} findmnt:\n"
-                cat $file/sos_commands/filesys/findmnt
-done		
-                exit;;		
+            -mnt) # Print findmnt output
+                  for file in "${tar_files[@]}"
+                  do
+                      printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} findmnt:\n"
+                      cat $file/sos_commands/filesys/findmnt
+                  done		
+                  exit;;		
   
 	    -ne) # Display nginx error.log error messages.
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
-		grep 'error' $file/var/log/nginx/error.log* 2>/dev/null
+                for file in "${tar_files[@]}"
+                do
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
+		    grep 'error' $file/var/log/nginx/error.log* 2>/dev/null
+	        done
 		exit;;	    
 	    -nw) # Display nginx error.log warning messages.
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
-		grep 'warn' $file/var/log/nginx/error.log* 2>/dev/null
+                for file in "${tar_files[@]}"
+                do
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} nginx error.log:\n"
+		    grep 'warn' $file/var/log/nginx/error.log* 2>/dev/null
+		done
 		exit;;
 	    -os) # Display Operating System.
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} Operating System:\n"
-		cat $file/etc/os-release
+                for file in "${tar_files[@]}"
+                do
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} Operating System:\n"
+		    cat $file/etc/os-release
+	        done
 		exit;;	    
 	    -ps) # Display running ansible processes.
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} ansible processes running:\n"
-		grep ansible $file/ps
+                for file in "${tar_files[@]}"
+                do
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} ansible processes running:\n"
+		    grep ansible $file/ps
+		done
 		exit;;
-	    -s)
-		# Display denied messages from audit.log
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
-		grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep 'denied'
+	    -s) # Display denied messages from audit.log
+                for file in "${tar_files[@]}"
+                do
+	            printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} audit.log Denied messages:\n"
+	            grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep 'denied'
+		done
 		exit;;	    
-	    -te)
-		# Display Error messages from tower.log (filtered scaling up/down messages)
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
-		grep -v 'pid' $file/var/log/tower/tower.log* | grep 'ERROR' 2>/dev/null
+	    -te) # Display Error messages from tower.log (filtered scaling up/down messages)
+                for file in "${tar_files[@]}"
+                do		    
+		    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Error messages:\n"
+		    grep -v 'pid' $file/var/log/tower/tower.log* | grep 'ERROR' 2>/dev/null
+		done
 		exit;;
 	    -tw) # Display Warning messages from tower.log (filtered scaling up/down messages)
-		printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
-		grep -v 'pid' $file/var/log/tower/tower.log* | grep -v 'periodic beat' | grep 'WARN' 2>/dev/null
+                for file in "${tar_files[@]}"
+                do
+		    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} tower.log Warning messages:\n"
+		    grep -v 'pid' $file/var/log/tower/tower.log* | grep -v 'periodic beat' | grep 'WARN' 2>/dev/null
+		done
 		exit;;
 	    -V) # Display Version
-		echo "SOS_Script 1.2.1  |  31 Aug 2022"
+		echo "SOS_Script 1.2.3  |  09 Sep 2022"
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
-                printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} license information:\n"
-		cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
+                for file in "${tar_files[@]}"
+                do
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} license information:\n"
+		    cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
+		done
                 exit;;
 	    --test)
 		# need to add simple test of args
