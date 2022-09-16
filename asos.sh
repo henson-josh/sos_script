@@ -200,10 +200,12 @@ do
 	    -ps) # Display running ansible processes.
                 for file in "${tar_files[@]}"
                 do
-                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} ansible processes running:\n"
-		    grep ansible $file/ps
-		done
-		exit;;
+                    echo "Which processes are you looking for?  (i.e. ansible, python, postgresql, etc)"
+                    read rpmname
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} $rpmname processes:\n"
+                    grep $rpmname $file/ps
+                done
+                exit;;		    
 	    -s) # Display denied messages from audit.log
                 for file in "${tar_files[@]}"
                 do
@@ -226,7 +228,7 @@ do
 		done
 		exit;;
 	    -V) # Display Version
-		echo "SOS_Script 1.2.3  |  09 Sep 2022"
+		echo "SOS_Script 1.2.4  |  16 Sep 2022"
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
                 for file in "${tar_files[@]}"
@@ -262,7 +264,7 @@ ansible=$(grep -i '^ansible\|automation' $file/installed-rpms 2> /dev/null | awk
 auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
 hostname=$(cat $file/hostname)
 nginxErrorErr=$(grep -o 'error' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
-nginxErrorWarn=$(grep -o 'warn' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
+nginxErrorWarn=$(grep -v 'upstream response is buffered' $file/var/log/nginx/error.log* 2>/dev/null | grep -o 'warn' | wc -l)
 ps=$(grep -c 'ansible\|pulp' $file/ps 2>/dev/null)
 python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python 2>/dev/null | awk -F/ '{printf "   - "$4"\n"}')
 towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log* 2>/dev/null | grep -o 'ERROR' | wc -l)
@@ -272,11 +274,11 @@ towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log* 2>/dev/null | grep -
 # Printing high level overview of the system
 printf "\nOverview of host:${BOLD_CYAN} '$hostname'${NC}\n"
 printf " - ${BOLD_BLUE}$ps${NC} ${UL}ansible${NC} processes running
- - ${BOLD_BLUE}$nginxErrorErr${NC} errors in the ${UL}nginx error.log${NC}
- - ${BOLD_BLUE}$nginxErrorWarn${NC} warnings in the ${UL}nginx error.log${NC}
- - ${BOLD_BLUE}$towerlogWarn${NC} warnings in the current ${UL}tower.log${NC} (filtered scaling up/down warnings)
- - ${BOLD_BLUE}$towerlogError${NC} errors in the current ${UL}tower.log${NC} 
- - ${BOLD_BLUE}$auditlogDenied${NC} denials logged in ${UL}audit.log${NC} (permissive=1 excluded)
+ - ${BOLD_BLUE}$nginxErrorErr${NC} ${BOLD}errors${NC} in the ${UL}nginx error.log${NC}
+ - ${BOLD_BLUE}$nginxErrorWarn${NC} ${BOLD}warnings${NC} in the ${UL}nginx error.log${NC}
+ - ${BOLD_BLUE}$towerlogWarn${NC} ${BOLD}warnings${NC} in the current ${UL}tower.log${NC} (filtered scaling up/down warnings)
+ - ${BOLD_BLUE}$towerlogError${NC} ${BOLD}errors${NC} in the current ${UL}tower.log${NC} 
+ - ${BOLD_BLUE}$auditlogDenied${NC} ${BOLD}denials${NC} logged in ${UL}audit.log${NC} (permissive=1 excluded)
  - has ${BOLD_GREEN}Ansible${NC} versions: \n$ansible
  - has ${BOLD_GREEN}Python${NC} versions: \n$python
 "
