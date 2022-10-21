@@ -165,7 +165,7 @@ do
                 for file in "${tar_files[@]}"
                 do
                     printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} memory free/used:\n"
-		    cat $file/free
+		    cat $file/sos_commands/memory/free_-m
 	        done
 		exit;;
             -mnt) # Print findmnt output
@@ -228,7 +228,7 @@ do
 		done
 		exit;;
 	    -V) # Display Version
-		echo "SOS_Script 1.2.4  |  16 Sep 2022"
+		echo "SOS_Script 1.2.5  |  21 Oct 2022"
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
                 for file in "${tar_files[@]}"
