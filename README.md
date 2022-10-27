@@ -12,7 +12,7 @@ df              Print file system disk usage
 h               Print this Help
 hosts           Print all hostnames from respective SOS Reports
 i               Print installed RPMs, will prompt user for input
-ip              Print all IP address from respective SOS Reports
+ip              Print all IP addresses from respective SOS Reports
 m               Print memory system free/used
 mnt             Print findmnt output
 os              Print /etc/os-release

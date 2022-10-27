@@ -64,7 +64,7 @@ Help()
    echo "h               Print this Help"
    echo "hosts           Print all hostnames from respective SOS Reports"
    echo "i               Print installed RPMs, will prompt user for input"
-   echo "ip              Print all IP address from respective SOS Reports"
+   echo "ip              Print all IP addresses from respective SOS Reports"
    echo "m               Print memory system free/used"
    echo "mnt             Print findmnt output"
    echo "os              Print /etc/os-release"
