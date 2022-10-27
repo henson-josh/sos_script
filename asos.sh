@@ -90,7 +90,8 @@ untar_sos_files(){
     do 
     if [ ! -d $file ]
     then
-	tar xf $file.tar.xz
+	tar xf $file.tar.xz --no-same-permissions
+	find $file -type d -exec chmod 0755 {} \;
 	# Removing /var/log/tower/ files older than 5 days
 	find $file/var/log/tower -mtime +5 -delete 2>/dev/null
     fi
@@ -115,7 +116,7 @@ do
                 for file in "${tar_files[@]}"
                 do
 		    printf '%s\n'" ${BOLD}Removing directory: $file${NC}"'%s\n'
-		    sudo rm --interactive=once -rf ${file}
+		    rm --interactive=once -rf ${file}
 		done
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
