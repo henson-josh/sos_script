@@ -3,7 +3,7 @@ Working towards a script that will parse SOS logs
 
 ### Current Features
 ```
-asos [-c|d|df|h|hosts|i|m|ne|nw|os|ps|s|te|tw|V]
+asos [-c|d|df|h|hosts|i|ip|m|ne|nw|os|ps|s|te|tw|V]
 options:
 
 c               Remove SOS report directories
@@ -12,6 +12,7 @@ df              Print file system disk usage
 h               Print this Help
 hosts           Print all hostnames from respective SOS Reports
 i               Print installed RPMs, will prompt user for input
+ip              Print all IP address from respective SOS Reports
 m               Print memory system free/used
 mnt             Print findmnt output
 os              Print /etc/os-release

@@ -55,7 +55,7 @@ Help()
 {
    # Display Help
    echo
-   echo "asos [-c|d|df|h|hosts|i|m|ne|nw|os|ps|s|te|tw|V]"
+   echo "asos [-c|d|df|h|hosts|i|ip|m|ne|nw|os|ps|s|te|tw|V]"
    echo "options:"
    echo
    echo "c               Remove SOS report directories"
@@ -64,6 +64,7 @@ Help()
    echo "h               Print this Help"
    echo "hosts           Print all hostnames from respective SOS Reports"
    echo "i               Print installed RPMs, will prompt user for input"
+   echo "ip              Print all IP address from respective SOS Reports"
    echo "m               Print memory system free/used"
    echo "mnt             Print findmnt output"
    echo "os              Print /etc/os-release"
@@ -153,7 +154,14 @@ do
 		    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} installed $rpmname packages:\n"
 		    grep $rpmname $file/installed-rpms
 	        done
-		exit;;		
+		exit;;
+            -ip) # Print IP adress of host
+                for file in "${tar_files[@]}"
+                do
+                    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} IP Address: \n"
+                    cat $file/ip_addr
+                done
+                exit;;
             -li) # Display output from ./sos_commands/tower/awx-manage_list_instances
                 for file in "${tar_files[@]}"
                 do
@@ -228,7 +236,7 @@ do
 		done
 		exit;;
 	    -V) # Display Version
-		echo "SOS_Script 1.2.5  |  21 Oct 2022"
+		echo "SOS_Script 1.2.6  |  27 Oct 2022"
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
                 for file in "${tar_files[@]}"
