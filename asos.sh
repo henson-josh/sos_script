@@ -33,13 +33,13 @@ REV='\033[7m'
 INVIS='\033[8m'
 
 
-tar_files=($(ls *.tar.xz | awk -F. '{print $1}'))
+tar_files=($(ls *.tar.* | awk -F. '{print $1}'))
 
 tar_file_array()
 {
-    if [ -e "*.tar.xz" ]
+    if [ -e "*.tar.*" ]
     then
-        tar_files=($(/usr/bin/ls *.tar.xz | awk -F. '{print $1}'))
+        tar_files=($(/usr/bin/ls *.tar.* | awk -F. '{print $1}'))
     else
         printf '%s\n\n'"${BLINK}${BOLD_RED}[31mNo tar file(s) found in: $(pwd)${NC} "'%s\n\n'
         exit 1
@@ -121,6 +121,12 @@ do
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
                 for file in "${tar_files[@]}"
                 do
+                    if [ -d "$file/sos_commands/tower/" ]
+                    then
+                       cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
+                    else  
+                       cat $file/sos_commands/controller/awx-manage_check_license_--data 2>/dev/null 
+                    fi
     		    printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} license information:\n"
                     cat $file/sos_commands/tower/awx-manage_check_license_--data 2>/dev/null
 		done
@@ -166,7 +172,12 @@ do
                 for file in "${tar_files[@]}"
                 do
                     printf "\nHost ${BOLD_CYAN}'$(cat $file/hostname)'${NC} instances:\n"
-                    cat $file/sos_commands/tower/awx-manage_list_instances 2>/dev/null
+                    if [ -d "$file/sos_commands/tower/" ]
+		    then
+		       cat $file/sos_commands/tower/awx-manage_list_instances 2>/dev/null
+		    else  
+		       cat $file/sos_commands/controller/awx-manage_list_instances 2>/dev/null 
+		    fi
 	        done
                 exit;;
             -m) # Print current memory usage
@@ -236,7 +247,7 @@ do
 		done
 		exit;;
 	    -V) # Display Version
-		echo "SOS_Script 1.2.6  |  27 Oct 2022"
+		echo "SOS_Script 1.3.0  |  11 Dec 2022"
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
                 for file in "${tar_files[@]}"
@@ -268,11 +279,12 @@ done
 for file in "${tar_files[@]}"
     do
 # Variables for high level overview of the system
-ansible=$(grep -i '^ansible\|automation' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
+ansible=$(grep -i '^ansible\|automation\|receptor' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
 auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
 hostname=$(cat $file/hostname)
 nginxErrorErr=$(grep -o 'error' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
 nginxErrorWarn=$(grep -v 'upstream response is buffered' $file/var/log/nginx/error.log* 2>/dev/null | grep -o 'warn' | wc -l)
+problem=$(grep -i '^crowd\|falcon\|mcafee' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
 ps=$(grep -c 'ansible\|pulp' $file/ps 2>/dev/null)
 python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python 2>/dev/null | awk -F/ '{printf "   - "$4"\n"}')
 towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log* 2>/dev/null | grep -o 'ERROR' | wc -l)
@@ -289,6 +301,7 @@ printf " - ${BOLD_BLUE}$ps${NC} ${UL}ansible${NC} processes running
  - ${BOLD_BLUE}$auditlogDenied${NC} ${BOLD}denials${NC} logged in ${UL}audit.log${NC} (permissive=1 excluded)
  - has ${BOLD_GREEN}Ansible${NC} versions: \n$ansible
  - has ${BOLD_GREEN}Python${NC} versions: \n$python
+ - ${BOLD_RED}Issues Found:${NC} (i.e. McAfee, Falcon Sensor, etc) \n$problem
 "
 done 
 
