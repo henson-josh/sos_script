@@ -46,6 +46,7 @@ tar_file_array()
     fi
 }
 
+
 enable_debug()
 {
     debug=true
@@ -115,7 +116,7 @@ do
                 for file in "${tar_files[@]}"
                 do
 		    printf '%s\n'" ${BOLD}Removing directory: $file${NC}"'%s\n'
-		    sudo rm --interactive=once -rf ${file}
+		    rm --interactive=once -rf ${file}
 		done
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
@@ -247,7 +248,7 @@ do
 		done
 		exit;;
 	    -V) # Display Version
-		echo "SOS_Script 1.3.0  |  11 Dec 2022"
+		echo "SOS_Script 1.3.1  |  20 Dec 2022"
 		exit;;
             -cl) # Display output from ./sos_commands/tower/awx-manage_check_license_--data
                 for file in "${tar_files[@]}"
@@ -279,12 +280,14 @@ done
 for file in "${tar_files[@]}"
     do
 # Variables for high level overview of the system
+#ansible=$(awk '/ansible/ || /automation/ || /receptor/' <$file/installed-rpms 2> /dev/null)
 ansible=$(grep -i '^ansible\|automation\|receptor' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
 auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
 hostname=$(cat $file/hostname)
 nginxErrorErr=$(grep -o 'error' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
 nginxErrorWarn=$(grep -v 'upstream response is buffered' $file/var/log/nginx/error.log* 2>/dev/null | grep -o 'warn' | wc -l)
-problem=$(grep -i '^crowd\|falcon\|mcafee' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
+#problem=$(awk '/crowd/ || /falcon/ || /mcafee/ || /puppet/' <$file/installed-rpms 2> /dev/null)
+problem=$(grep -i '^crowd\|falcon\|mcafee\|puppet' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
 ps=$(grep -c 'ansible\|pulp' $file/ps 2>/dev/null)
 python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python 2>/dev/null | awk -F/ '{printf "   - "$4"\n"}')
 towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log* 2>/dev/null | grep -o 'ERROR' | wc -l)
