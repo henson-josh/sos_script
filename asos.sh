@@ -280,16 +280,14 @@ done
 for file in "${tar_files[@]}"
     do
 # Variables for high level overview of the system
-#ansible=$(awk '/ansible/ || /automation/ || /receptor/' <$file/installed-rpms 2> /dev/null)
-ansible=$(grep -i '^ansible\|automation\|receptor' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
+ansible=$(awk '$1 ~ /^ansible/ || /^automation/ || /^receptor/ { printf "   - "$1"\n" }' <$file/installed-rpms 2> /dev/null)
 auditlogDenied=$(grep -v 'permissive=1' $file/var/log/audit/audit.log 2>/dev/null | grep -c 'denied')
 hostname=$(cat $file/hostname)
 nginxErrorErr=$(grep -o 'error' $file/var/log/nginx/error.log* 2>/dev/null | wc -l)
 nginxErrorWarn=$(grep -v 'upstream response is buffered' $file/var/log/nginx/error.log* 2>/dev/null | grep -o 'warn' | wc -l)
-#problem=$(awk '/crowd/ || /falcon/ || /mcafee/ || /puppet/' <$file/installed-rpms 2> /dev/null)
-problem=$(grep -i '^crowd\|falcon\|mcafee\|puppet' $file/installed-rpms 2> /dev/null | awk '{printf "   - "$1"\n"}')
+problem=$(awk '/crowd/ || /falcon/ || /mcafee/ || /puppet/ { printf "   - "$1"\n" }' <$file/installed-rpms 2> /dev/null)
 ps=$(grep -c 'ansible\|pulp' $file/ps 2>/dev/null)
-python=$(grep -i '^/usr/bin/python' $file/sos_commands/alternatives/alternatives_--display_python 2>/dev/null | awk -F/ '{printf "   - "$4"\n"}')
+python=$(awk '$1 ~ /^\/usr\/bin\/python/' <$file/sos_commands/alternatives/alternatives_--display_python 2> /dev/null | awk -F/ '{printf "   - "$4"\n"}') 
 towerlogError=$(grep -v 'pid' $file/var/log/tower/tower.log* 2>/dev/null | grep -o 'ERROR' | wc -l)
 towerlogWarn=$(grep -v 'pid' $file/var/log/tower/tower.log* 2>/dev/null | grep -v 'periodic beat' | grep -o 'WARN' | wc -l)
 
